@@ -22,7 +22,8 @@ const Dashboard = () => {
   }, [])
 
   const handleItemClick = (id, name) => {
-    navigate(`/matches?series_id=${id}&name=${encodeURIComponent(name)}`) // Pass series_id and name in the URL
+    // navigate(`/matches?series_id=${id}&name=${encodeURIComponent(name)}`) // Pass series_id and name in the URL
+    navigate('/matches', { state: { id, name } })
   }
 
   return (
@@ -36,16 +37,24 @@ const Dashboard = () => {
           padding: '10px',
         }}
       >
-        <div style={{ width: '30%', textAlign: 'center', fontFamily: 'monospace', fontSize: '18px' }}>
+        <div
+          style={{ width: '30%', textAlign: 'center', fontFamily: 'monospace', fontSize: '18px' }}
+        >
           League Name
         </div>
-        <div style={{ width: '30%', textAlign: 'center', fontFamily: 'monospace', fontSize: '18px' }}>
+        <div
+          style={{ width: '30%', textAlign: 'center', fontFamily: 'monospace', fontSize: '18px' }}
+        >
           Start Date
         </div>
-        <div style={{ width: '30%', textAlign: 'center', fontFamily: 'monospace', fontSize: '18px' }}>
+        <div
+          style={{ width: '30%', textAlign: 'center', fontFamily: 'monospace', fontSize: '18px' }}
+        >
           End Date
         </div>
-        <div style={{ width: '30%', textAlign: 'center', fontFamily: 'monospace', fontSize: '18px' }}>
+        <div
+          style={{ width: '30%', textAlign: 'center', fontFamily: 'monospace', fontSize: '18px' }}
+        >
           Month
         </div>
       </div>
@@ -54,7 +63,7 @@ const Dashboard = () => {
           {matchDetails.data.data.map((item, index) => (
             <div
               key={index}
-              onClick={() => handleItemClick(item.series_id, item.name)} // Pass both ID and name
+              onClick={() => handleItemClick(item.series_id, item.name)}
               style={{
                 display: 'flex',
                 flexDirection: 'row',
@@ -66,12 +75,8 @@ const Dashboard = () => {
               }}
             >
               <div style={{ width: '30%', textAlign: 'center', padding: '10px' }}>{item.name}</div>
-              <div style={{ width: '30%', textAlign: 'center' }}>
-                {formatDate(item.start_date)}
-              </div>
-              <div style={{ width: '30%', textAlign: 'center' }}>
-                {formatDate(item.end_date)}
-              </div>
+              <div style={{ width: '30%', textAlign: 'center' }}>{formatDate(item.start_date)}</div>
+              <div style={{ width: '30%', textAlign: 'center' }}>{formatDate(item.end_date)}</div>
               <div style={{ width: '30%', textAlign: 'center' }}>
                 {item.series_date ? formatDate(item.series_date) : 'N/A'}
               </div>

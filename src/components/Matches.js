@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
 const Matches = () => {
-  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+
+  const {
+    state: { id, name },
+  } = useLocation()
+
   const [matches, setMatches] = useState(null)
   const [error, setError] = useState(null)
+  const [venue, setVenue] = useState(null)
 
-  const seriesId = searchParams.get('series_id') // Get series_id from URL
-  const leagueName = searchParams.get('name') // Get league name from URL
-
-  // Function to format date with months in words
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' } // Month in words
     return new Intl.DateTimeFormat('en-US', options).format(new Date(dateString))
@@ -18,7 +20,7 @@ const Matches = () => {
 
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:8000/api/matches?series_id=${seriesId}`)
+      .get(`http://127.0.0.1:8000/api/matches?series_id=${id}`)
       .then((res) => {
         if (res.data?.status === 200) {
           setMatches(res.data.data.data)
@@ -30,14 +32,56 @@ const Matches = () => {
         console.error('Error fetching matches:', error)
         setError('Failed to load matches. Please try again later.')
       })
-  }, [seriesId])
+  }, [id])
+
+  useEffect(() => {
+    axios
+      .get(`http://127.0.0.1:8000/api/venues`)
+      .then((res) => {
+        if (res.data?.status === 200) {
+          setVenue(res.data.data.data)
+        } else {
+          setError(res.data.message || 'No matches found.')
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching matches:', error)
+        setError('Failed to load matches. Please try again later.')
+      })
+  }, [id])
+
+  const handleItemClick = (id) => {
+    navigate('/innings', { state: { id } })
+  }
 
   return (
     <div>
-      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>
-        Matches for: {decodeURIComponent(leagueName)}
-      </h2>
+      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Matches for: {name}</h2>
       {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+
+      {venue && venue.length > 0 && (
+        <table
+          style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            marginBottom: '20px',
+            textAlign: 'center',
+          }}
+        >
+          <thead>
+            <tr style={{ backgroundColor: '#f4f4f4', textAlign: 'center' }}>
+              <th style={{ padding: '10px', border: '1px solid #ddd' }}>Match Venues</th>
+            </tr>
+          </thead>
+          <tbody>
+            {venue.map((venues, index) => (
+              <tr key={index}>
+                <td style={{ padding: '10px', border: '1px solid #ddd' }}>{venues.ground}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
       {matches && matches.length > 0 ? (
         <table
           style={{
@@ -56,10 +100,8 @@ const Matches = () => {
           </thead>
           <tbody>
             {matches.map((match, index) => (
-              <tr key={index}>
-                <td style={{ padding: '10px', border: '1px solid #ddd' }}>
-                  {match.description}
-                </td>
+              <tr key={index} onClick={() => handleItemClick(match.id)}>
+                <td style={{ padding: '10px', border: '1px solid #ddd' }}>{match.description}</td>
                 <td style={{ padding: '10px', border: '1px solid #ddd' }}>
                   {formatDate(match.start_date)}
                 </td>
